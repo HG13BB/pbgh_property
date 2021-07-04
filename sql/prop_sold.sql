@@ -1,0 +1,34 @@
+/* Query to find houses that could be possible flips 
+	in Allegency County, PA
+    Date source from: https://tools.wprdc.org/property-api
+    Henry Greeley 5.23.21
+*/ 
+
+SELECT 
+   parc.*
+ ,DATE(CONCAT(RIGHT(PREVSALEDATE,4),'-',LEFT(PREVSALEDATE,2),'-',RIGHT(LEFT(PREVSALEDATE,5),2))) 						AS PREVSLDT
+ ,DATE(CONCAT(RIGHT(SALEDATE,4),'-',LEFT(SALEDATE,2),'-',RIGHT(LEFT(SALEDATE,5),2))) 									AS SALEDT
+,DATEDIFF(
+		  DATE(CONCAT(RIGHT(SALEDATE,4),'-',LEFT(SALEDATE,2),'-',RIGHT(LEFT(SALEDATE,5),2))),
+          DATE(CONCAT(RIGHT(PREVSALEDATE,4),'-',LEFT(PREVSALEDATE,2),'-',RIGHT(LEFT(PREVSALEDATE,5),2)))
+          ) 																										    AS HELDDAYS
+							
+
+
+FROM pbgh_property.allegheny_cty_parcels_2021 parc
+
+WHERE 1=1
+AND DATE(CONCAT(RIGHT(PREVSALEDATE,4),'-',LEFT(PREVSALEDATE,2),'-',RIGHT(LEFT(PREVSALEDATE,5),2)))  >= '2006-01-01' 
+
+
+AND CLASSDESC = 'RESIDENTIAL'
+AND SALEPRICE >=  50000
+AND PREVSALEPRICE >  1000
+
+#bought held for more than 30 days and less than a year
+AND DATEDIFF(
+		  DATE(CONCAT(RIGHT(SALEDATE,4),'-',LEFT(SALEDATE,2),'-',RIGHT(LEFT(SALEDATE,5),2))),
+          DATE(CONCAT(RIGHT(PREVSALEDATE,4),'-',LEFT(PREVSALEDATE,2),'-',RIGHT(LEFT(PREVSALEDATE,5),2)))
+          )  BETWEEN 30 AND 600
+
+ORDER BY DATE(CONCAT(RIGHT(PREVSALEDATE,4),'-',LEFT(PREVSALEDATE,2),'-',RIGHT(LEFT(PREVSALEDATE,5),2)));
